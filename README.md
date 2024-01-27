@@ -19,7 +19,7 @@ ExpressSkeletonBuilder helps you quickly set up an Express.js project with a pre
 3. Run the framework file:
 
     ```bash
-    node framework [prjoject_name]
+    node framework [project_name]
     ```
 
 ## Project Structure
