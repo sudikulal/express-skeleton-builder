@@ -31,6 +31,8 @@ Here's an overview of the directory structure:
   - routes/
   - public/
 - .gitignore
+- index.js
 - package.json
+- package-lock.json
 - README.md
 
