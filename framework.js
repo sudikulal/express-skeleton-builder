@@ -27,9 +27,10 @@ async function createFolders(projectRoot) {
   }
 }
 
-async function createFiles(projectRoot) {
-  const files = require("./content.js");
+async function createFiles(projectRoot, dbType) {
+  const getFiles = require("./content.js");
   try {
+    const files = getFiles(dbType);
     await Promise.all(
       Object.entries(files).map(([file, data]) =>
         fs.writeFile(path.join(projectRoot, file), data, { flag: "wx" })
@@ -39,7 +40,8 @@ async function createFiles(projectRoot) {
     console.log(error);
   }
 }
-async function createExpressProject(projectName = "expressproject") {
+
+async function createExpressProject(projectName, dbType) {
   const projectRoot = path.join(__dirname, projectName);
 
   await fs.mkdir(projectRoot);
@@ -48,10 +50,15 @@ async function createExpressProject(projectName = "expressproject") {
 
   await execAsync("npm init -y");
 
+  const packages = ["express", "body-parser", "cors", "jsonwebtoken"];
+  dbType == "m"? packages.push("mongoose") : packages.push("sequelize")
+
   await Promise.all([
-    execAsync("npm install express body-parser cors jsonwebtoken"),
-    createFolders(projectRoot).then(async () => await createFiles(projectRoot)),
+    execAsync("npm install "+packages.join(" ")),
+    createFolders(projectRoot).then(
+      async () => await createFiles(projectRoot, dbType)
+    ),
   ]);
 }
 
-createExpressProject(process.argv[3]).catch((err) => console.error(err));
+module.exports = { createExpressProject };

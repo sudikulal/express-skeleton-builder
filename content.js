@@ -14,7 +14,7 @@ app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// app.use(express.static(path.join(__dirname, "./public")));
+app.use(express.static(path.join(__dirname, "./public")));
 
 app.get('/', (req, res) => {
   res.send("hello world");
@@ -29,6 +29,15 @@ app.listen(port, () => {
 });
 `;
 
+content[".gitignore"] =  `
+node_modules
+.env
+`
+
+content[".env"] = `
+
+`
+
 content["src/configs/config.js"] = `
 require('dotenv').config()
 const env = process.env
@@ -42,9 +51,9 @@ config.DB={
         HOST:env.HOST,
         PORT:env.PORT,
         DIALECT:env.DIALECT,
-    },
+    }, 
     MONGODB:{
-        MONGODB_URI:env.MONGODB_URI,
+        URI:env.MONGODB_URI,
     }
 }
 
@@ -109,8 +118,6 @@ content["public/index.html"] = `
 </html>
   `;
 
-content["src/models/user.model.js"] = ``;
-
 content["src/services/user.service.js"] = `
 async function validateUser(user,password){
 //valid in db
@@ -121,6 +128,97 @@ module.exports = {
 }
 `;
 
-content["src/utils/db.util.js"] = ``;
+function getFiles(dbType) {
+  if (dbType == "s") {
+    content["src/utils/db.util.js"] = `
+    const { Sequelize } = require("sequelize");
+    const {DB:{SQL}} = require("../configs/config.js");
 
-module.exports = content;
+    const sequelize = new Sequelize(SQL.NAME, SQL.USER, SQL.PASSWORD, {
+      host: SQL.HOST,
+      port: SQL.PORT,
+      dialect: SQL.DIALECT,
+    });
+
+    module.exports = sequelize
+    `;
+
+    content["src/models/user.model.js"] = `
+    const { DataTypes } = require("sequelize");
+    const sequelize = require("../utils/db.util.js");
+
+    const  userModel = sequelize.define("User", {
+    user_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      user_name: {
+        type: DataTypes.STRING,
+      },
+      password: {
+        type: DataTypes.STRING,
+      },
+      status: {
+        type: DataTypes.INTEGER,
+        defaultValue: 1,
+      },
+    });
+
+    module.exports = userModel;
+    `;
+  } else {
+    content["src/utils/db.util.js"] = `
+const mongoose = require("mongoose");
+const {DB:{MONGODB}} = require('../configs/config.js')
+
+let cachedConnection;
+
+const connectDB = () => {
+  try {
+    if (cachedConnection) return cachedConnection;
+
+    mongoose.connect(MONGODB.URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
+    cachedConnection = mongoose.connection;
+    return cachedConnection;
+  } catch (error) {
+    console.error("Error connecting to MongoDB:", error.message);
+    process.exit(1);
+  }
+};
+
+module.exports = connectDB;
+    `;
+
+    content["src/models/user.model.js"] = `
+  const connectDB = require("../utils/db.util.js");
+  const connection = connectDB();
+
+  const userSchema = new connection.Schema({
+    user_name: {
+      type: String,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    status: {
+      type: number,
+      required: true,
+    },
+  });
+
+  const User = connection.model("user", userSchema);
+  module.exports = User
+    `;
+  }
+
+  return content;
+}
+
+module.exports = getFiles;

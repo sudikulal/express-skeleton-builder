@@ -16,10 +16,10 @@ ExpressSkeletonBuilder helps you quickly set up an Express.js project with a pre
     cd express-skeleton-builder
     ```
 
-3. Run the framework file:
+3. Run the index file:
 
     ```bash
-    node framework [project_name]
+    node index.js
     ```
 
 ## Project Structure
