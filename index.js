@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const readline = require("node:readline/promises");
 const { createExpressProject } = require("./framework");
 
@@ -29,6 +30,8 @@ async function main() {
     }
 
     readInstance.close();
+
+    console.log("creating project---")
 
     await createExpressProject(projectName, dbType);
   } catch (error) {

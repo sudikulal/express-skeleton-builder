@@ -1,0 +1,14 @@
+{
+  "name": "express-skeleton-builder",
+  "version": "1.0.2",
+  "description": "Generates a basic Express project structure",
+  "main": "index.js",
+  "bin": {
+    "express-skeleton-builder":"./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "sudikulal",
+  "license": "MIT"
+}
