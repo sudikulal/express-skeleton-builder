@@ -41,20 +41,18 @@ async function createFiles(projectRoot, dbType) {
   }
 }
 
-async function createExpressProject(projectName, dbType) {
-  const projectRoot = path.join(__dirname, projectName);
+async function createExpressProject(projectName, dbType, targetDirectory) {
+  const projectRoot = path.join(targetDirectory, projectName);
 
   await fs.mkdir(projectRoot);
 
-  process.chdir(projectRoot);
-
-  await execAsync("npm init -y");
+  await execAsync(`cd ${projectRoot} && npm init -y`);
 
   const packages = ["express", "body-parser", "cors", "jsonwebtoken"];
-  dbType == "m"? packages.push("mongoose") : packages.push("sequelize")
+  dbType == "m" ? packages.push("mongoose") : packages.push("sequelize");
 
   await Promise.all([
-    execAsync("npm install "+packages.join(" ")),
+    execAsync(`cd ${projectRoot} && npm install ${packages.join(" ")}`),
     createFolders(projectRoot).then(
       async () => await createFiles(projectRoot, dbType)
     ),

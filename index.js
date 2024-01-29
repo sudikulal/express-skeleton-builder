@@ -33,7 +33,9 @@ async function main() {
 
     console.log("creating project---")
 
-    await createExpressProject(projectName, dbType);
+    const targetDirectory = process.cwd();
+
+    await createExpressProject(projectName, dbType,targetDirectory);
   } catch (error) {
     console.error(error.message);
   }
