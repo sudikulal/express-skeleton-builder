@@ -21,25 +21,6 @@ or you can just execute it without installing:
 ```bash
 npm exec express-skeleton-builder
 ```
-### run locally
-1. Clone the repository:
-
-    ```bash
-    git clone https://github.com/sudikulal/express-skeleton-builder
-    ```
-
-2. Navigate to the project directory:
-
-    ```bash
-    cd express-skeleton-builder
-    ```
-
-3. Run the index file:
-
-    ```bash
-    node index.js
-    ```
-
 ## Project Structure
 Here's an overview of the directory structure:
 - src/
