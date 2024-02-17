@@ -45,18 +45,33 @@ async function createFiles(projectRoot, dbType) {
   }
 }
 
+async function modifyPackageJson(projectRoot){
+  const packageJsonPath = path.join(projectRoot, 'package.json');
+  const packageJsonContent = await fs.readFile(packageJsonPath, 'utf-8');
+  const packageJson = JSON.parse(packageJsonContent);
+
+  packageJson.scripts = {
+    "test": "jest",
+    "dev": "nodemon index.js"
+  };
+
+  await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
+}
+
 async function createExpressProject(projectName, dbType, targetDirectory) {
   const projectRoot = path.join(targetDirectory, projectName);
 
   await fs.mkdir(projectRoot);
 
   await execAsync(`cd ${projectRoot} && npm init -y`);
+  await modifyPackageJson(projectRoot)
 
   const packages = ["express", "body-parser", "cors", "jsonwebtoken"];
+  const devDependencies = ["jest","nodemon"]
   dbType == "m" ? packages.push("mongoose") : packages.push("sequelize");
 
   await Promise.all([
-    execAsync(`cd ${projectRoot} && npm install ${packages.join(" ")}`),
+    execAsync(`cd ${projectRoot} && npm install ${packages.join(" ")} && npm install -D ${devDependencies.join(" ")}`),
     createFolders(projectRoot).then(
       async () => await createFiles(projectRoot, dbType)
     ),
