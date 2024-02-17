@@ -229,10 +229,11 @@ module.exports = connectDB;
     `;
 
     content["src/models/user.model.js"] = `
+  const mongoose = require("mongoose");
   const connectDB = require("../utils/db.util.js");
-  const connection = connectDB();
+  connectDB();
 
-  const userSchema = new connection.Schema({
+  const userSchema = new mongoose.Schema({
     user_name: {
       type: String,
       required: true,
@@ -247,7 +248,7 @@ module.exports = connectDB;
     },
   });
 
-  const User = connection.model("user", userSchema);
+  const User = mongoose.model("user", userSchema);
   module.exports = User
     `;
   }
