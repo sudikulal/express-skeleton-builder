@@ -144,7 +144,7 @@ describe("running test", () => {
   it("should list user", () => listTestCase.shouldList());
 });
 `
-content["tests/testcases/listUser"] = `
+content["tests/testcases/listUser.js"] = `
 const request = require("supertest");
 const app = require("../../app.js");
 

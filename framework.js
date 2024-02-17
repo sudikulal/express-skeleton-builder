@@ -67,7 +67,7 @@ async function createExpressProject(projectName, dbType, targetDirectory) {
   await modifyPackageJson(projectRoot)
 
   const packages = ["express", "body-parser", "cors", "jsonwebtoken"];
-  const devDependencies = ["jest","nodemon"]
+  const devDependencies = ["jest","nodemon","supertest"]
   dbType == "m" ? packages.push("mongoose") : packages.push("sequelize");
 
   await Promise.all([
