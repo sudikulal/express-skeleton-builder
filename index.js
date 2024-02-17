@@ -2,6 +2,20 @@
 const readline = require("node:readline/promises");
 const { createExpressProject } = require("./framework");
 
+function showLoadingAnimation() {
+  const frames = ["-", "\\", "|", "/"];
+  let index = 0;
+  const loadingInterval = setInterval(() => {
+    process.stdout.clearLine();
+    process.stdout.cursorTo(0);
+    process.stdout.write(`Installing ----------${frames[index]}`);
+
+    index = (index + 1) % frames.length;
+  }, 100);
+
+  return loadingInterval;
+}
+
 async function main() {
   try {
     const readInstance = readline.createInterface({
@@ -31,11 +45,16 @@ async function main() {
 
     readInstance.close();
 
-    console.log("creating project---")
+    const loadingInterval = showLoadingAnimation();
 
     const targetDirectory = process.cwd();
 
     await createExpressProject(projectName, dbType,targetDirectory);
+
+    clearInterval(loadingInterval);
+    process.stdout.clearLine();
+    process.stdout.cursorTo(0); 
+    console.log("Package installed successfully!");
   } catch (error) {
     console.error(error.message);
   }
