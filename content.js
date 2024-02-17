@@ -1,14 +1,21 @@
 const content = {};
 
 content["index.js"] = `
-const express = require('express');
+const app = require("./app");
+
+const port = process.env.PORT || 3000;
+
+app.listen(port, () => {
+    console.log(\`Server is listening at http://localhost:\${port}\`);
+});
+`;
+
+content["app.js"] = `
+const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const path  = require("path")
-
 
 const app = express();
-const port = process.env.PORT || 3000;
 
 app.use(cors({ origin: "*" }));
 app.use(express.json());
@@ -16,18 +23,16 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, "./public")));
 
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   res.send("hello world");
 });
 
-const userRoute = require("./src/routes/user.route.js")
+const userRoute = require("./src/routes/user.route.js");
 
-app.use(userRoute)
+app.use("/user", userRoute);
 
-app.listen(port, () => {
-    console.log(\`Server is listening at http://localhost:\${port}\`);
-});
-`;
+module.exports = app;
+`
 
 content[".gitignore"] =  `
 node_modules
@@ -66,22 +71,17 @@ config.PORT = env.PORT
 
 content["src/controllers/user.controller.js"] = `
 const userService = require("../services/user.service.js")
-async function login(req, res) {
+async function listUser(req, res) {
   try {
-    const { user,password } = req.body;
-    
-    if(!user || !password) return res.status(401).json({msg:"user/password connot be empty"})
-
-    const isUserExist = userService.validateUser(user,password)
-
-    return res.status(200).json({msg:"success"})
+    const response =await userService.findAll();
+    return res.status(response.status).json(response.data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error });
   }
 }
 
-module.exports = { login };
+module.exports = { listUser };
 
 `;
 
@@ -89,13 +89,6 @@ content["src/routes/user.route.js"] = `
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/user.controller.js");
-const authMiddleware  = require("../middlewares/auth.middleware.js")
-
-router.use("/user")
-
-router.post("/login",userController.login);
-
-router.use(authMiddleware)
 
 router.get("/list",userController.listUser)
 
@@ -119,14 +112,55 @@ content["public/index.html"] = `
   `;
 
 content["src/services/user.service.js"] = `
-async function validateUser(user,password){
-//valid in db
-return true
-}
+const User = require("../models/user.model.js");
+
+async function findAll() {
+  try {
+    const users = await User.find();
+    return { status: 200, data: { message: "success", user_list: users } };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
 module.exports = {
-  validateUser
+  findAll
 }
 `;
+
+content["tests/index.test.js"] = `
+const listTestCase = require("./testcases/listUser");
+
+beforeAll(async () => {
+  //add setup before tests if needed
+});
+
+afterAll(async () => {
+//add cleanup after tests if needed
+});
+
+describe("running test", () => {
+  it("should list user", () => listTestCase.shouldList());
+});
+`
+content["tests/testcases/listUser"] = `
+const request = require("supertest");
+const app = require("../../app.js");
+
+exports.shouldList = async () => {
+  try {
+    const response = await request(app).get("/user/list");
+    expect(response.statusCode).toEqual(200);
+    expect(response.body.message).toEqual("success");
+    expect(response.body.hasOwnProperty("user_list")).toEqual(true);
+    expect(Array.isArray(response.body.user_list)).toEqual(true);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+`
 
 function getFiles(dbType) {
   if (dbType == "s") {

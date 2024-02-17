@@ -12,12 +12,16 @@ async function createFolders(projectRoot) {
       "src/models",
       "src/middlewares",
       "src/routes",
-      "public",
       "src/services",
       "src/utils",
+      "tests/testcases",
     ];
 
-    await fs.mkdir(path.join(projectRoot, "src"));
+    await Promise.all([
+      fs.mkdir(path.join(projectRoot, "src")),
+      fs.mkdir(path.join(projectRoot, "public")),
+      fs.mkdir(path.join(projectRoot, "tests")),
+    ]);
 
     await Promise.all(
       subdirectories.map((dir) => fs.mkdir(path.join(projectRoot, dir)))
